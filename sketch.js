@@ -1,83 +1,5 @@
-// // Video animation export
 
-// document.addEventListener("DOMContentLoaded", function () {
-//   const canvas = document.getElementById("myCanvas");
-//   const ctx = canvas.getContext("2d");
-//   const startCaptureButton = document.getElementById("startCapture");
 
-//   const capturer = new CCapture({
-//     format: "webm",
-//     framerate: 30,
-//     bitrate: 12000,
-//     quality: 0.9,
-//   });
-//   const totalFrames = 100;
-//   let frameCounter = 0;
-//   let captureVideo = false;
-
-//   function draw() {
-//     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-//     ctx.beginPath();
-//     ctx.arc((frameCounter * 5) % canvas.width, canvas.height / 2, 25, 0, 2 * Math.PI);
-//     ctx.fillStyle = "blue";
-//     ctx.fill();
-
-//     if (captureVideo) {
-//       capturer.capture(canvas);
-//       frameCounter++;
-
-//       if (frameCounter >= totalFrames) {
-//         capturer.stop();
-//         capturer.save();
-//         captureVideo = false;
-//       }
-//     }
-
-//     requestAnimationFrame(draw);
-//   }
-
-//   startCaptureButton.addEventListener("click", () => {
-//     if (!captureVideo) {
-//       frameCounter = 0;
-//       capturer.start();
-//       captureVideo = true;
-//     }
-//   });
-
-//   requestAnimationFrame(draw);
-// });
-
-// // Video frame extraction
-
-// document.addEventListener("DOMContentLoaded", function () {
-//   const video = document.getElementById("inputVideo");
-//   const canvas = document.getElementById("videoCanvas");
-//   const ctx = canvas.getContext("2d");
-//   const playCanvasButton = document.getElementById("playCanvas");
-
-//   video.addEventListener("loadedmetadata", () => {
-//     canvas.width = video.videoWidth;
-//     canvas.height = video.videoHeight;
-//   });
-
-//   function drawVideoOnCanvas() {
-//     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-//     if (!video.paused && !video.ended) {
-//       requestAnimationFrame(drawVideoOnCanvas);
-//     }
-//   }
-
-//   playCanvasButton.addEventListener("click", () => {
-//     video.play();
-//     drawVideoOnCanvas();
-//   });
-
-//   video.addEventListener("ended", () => {
-//     video.pause();
-//   });
-// });
 
 document.addEventListener("DOMContentLoaded", function () {
   const video = document.getElementById("inputVideo");
@@ -85,6 +7,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const ctx = canvas.getContext("2d");
   const playCanvasButton = document.getElementById("playCanvas");
   const exportCanvasButton = document.getElementById("exportCanvas");
+
+  const croppedCanvas = document.getElementById("cropCanvas");
+  const croppedCtx = croppedCanvas.getContext("2d");
+
+
+  const image = new Image();
+  image.src = "./matieux.png";
+
+  // let cropper;
 
   const capturer = new CCapture({
     format: "webm",
@@ -99,6 +30,11 @@ document.addEventListener("DOMContentLoaded", function () {
   video.addEventListener("loadedmetadata", () => {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
+
+    // cropper = new Cropper(canvas, {
+    //   autoCrop: false,
+    //   background: false,
+    // });
   });
 
   function draw() {
@@ -110,10 +46,33 @@ document.addEventListener("DOMContentLoaded", function () {
     ctx.fill();
     circleX = (circleX + 5) % canvas.width;
 
+    // const aspectRatio = image.width / image.height;
+    // const imageWidth = 200;
+    // const imageHeight = imageWidth / aspectRatio;
+    // ctx.drawImage(image, circleX, canvas.height / 2 - imageHeight / 2, imageWidth, imageHeight);
+
+    // Calculate the image size based on the current frame count
+    const scaleFactor = frameCounter / totalFrames;
+    const imageWidth = canvas.width * scaleFactor;
+    const imageHeight = canvas.height * scaleFactor;
+
+    // Draw the image at the center of the canvas, zooming in from zero
+    ctx.drawImage(image, (canvas.width - imageWidth) / 2, (canvas.height - imageHeight) / 2, imageWidth, imageHeight);
+
+
+
     if (captureVideo) {
+      // const croppedData = cropper.getCroppedCanvas();
       console.log(frameCounter)
-      capturer.capture(canvas);
+      // capturer.capture(croppedCanvas);
+      capturer.capture(canvas); 
       frameCounter++;
+
+      // croppedCtx.clearRect(0, 0, croppedCanvas.width, croppedCanvas.height);
+
+      // const offsetX = (croppedCanvas.width - croppedData.width) / 2;
+      // const offsetY = (croppedCanvas.height - croppedData.height) / 2;
+      // croppedCtx.drawImage(croppedData, offsetX, offsetY);
 
       if (frameCounter >= totalFrames) {
         capturer.stop();
